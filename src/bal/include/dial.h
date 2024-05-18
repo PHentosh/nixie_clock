@@ -60,7 +60,7 @@ public:
 
     void add_lamp(mcp23017_t* mcp_cfg, uint8_t addr, mcp23017_gpio_t group);
 
-    bool set_time(tm* timeinfo);
+    bool set_time(tm& timeinfo);
     bool set_lamp_value(size_t ind, uint8_t value);
 
 };

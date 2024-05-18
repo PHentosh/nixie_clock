@@ -6,11 +6,11 @@ static const char *TAG = "DIAL";
 
 bool Lamp::set_value(uint8_t val)
 {
-
+    ESP_LOGI(TAG, "Setting lamp value: 0x%u", val);
     uint8_t reg;
     if (ESP_OK != mcp23017_read_register(mcp_cfg, MCP23017_GPIO, group, &reg))
     {
-        ESP_LOGE(TAG, "Reading register");
+        ESP_LOGE(TAG, "Reading register failed");
         return false;
     }
     assert(reg);
@@ -21,7 +21,7 @@ bool Lamp::set_value(uint8_t val)
 
     if (ESP_OK != mcp23017_write_register(mcp_cfg, MCP23017_GPIO, group, reg))
     {
-        ESP_LOGE(TAG, "Writing register");
+        ESP_LOGE(TAG, "Writing register failed");
         return false;
     }
     return true;
@@ -66,33 +66,32 @@ bool Dial::set_lamp_value(size_t ind, uint8_t value)
     return ret;
 }
 
-bool Dial::set_time(tm *timeinfo)
+bool Dial::set_time(tm& timeinfo)
 {
-
     if (lamps.size() < 2)
     {
         ESP_LOGW("DIAL", "Can`t display time without at least 2 lamps");
         return true;
     }
 
-    bool ret;
+    uint8_t ret = 0;
 
-    ret =         set_lamp_value(0, timeinfo->tm_hour / 10);
-    ret = ret and set_lamp_value(1, timeinfo->tm_hour % 10);
+    ret += set_lamp_value(0, timeinfo.tm_hour / 10);
+    ret += set_lamp_value(1, timeinfo.tm_hour % 10);
 
     if (lamps.size() < 4)
-        return ret;
+        return not ret;
 
-    ret = ret and set_lamp_value(2, timeinfo->tm_min / 10);
-    ret = ret and set_lamp_value(3, timeinfo->tm_min % 10);
+    ret += set_lamp_value(2, timeinfo.tm_min / 10);
+    ret += set_lamp_value(3, timeinfo.tm_min % 10);
 
     if (lamps.size() < 6)
-        return ret;
+        return not ret;
 
-    ret = ret and set_lamp_value(5, timeinfo->tm_sec / 10);
-    ret = ret and set_lamp_value(6, timeinfo->tm_sec % 10);
+    ret += set_lamp_value(5, timeinfo.tm_sec / 10);
+    ret += set_lamp_value(6, timeinfo.tm_sec % 10);
 
-    return ret;
+    return not ret;
 }
 
 void Dial::add_lamp(mcp23017_t *mcp_cfg, uint8_t addr, mcp23017_gpio_t group)

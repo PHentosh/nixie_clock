@@ -78,10 +78,10 @@ void BoardRx::setup() noexcept
         ESP_LOGE(TAG, "Error initializing i2c");
     }
 
-    dial.add_lamp(&mcp_cfg, 0x0F, GPIOA);
     dial.add_lamp(&mcp_cfg, 0xF0, GPIOA);
     dial.add_lamp(&mcp_cfg, 0x0F, GPIOB);
     dial.add_lamp(&mcp_cfg, 0xF0, GPIOB);
+    dial.add_lamp(&mcp_cfg, 0x0F, GPIOA);
 }
 
 void BoardRx::run() noexcept
@@ -92,47 +92,47 @@ void BoardRx::run() noexcept
         {
             switch (msg.event) {
 
-                case DIAL_SET_TIME:
+                case BOARD_DIAL_SET_TIME:
                 {
-                    dial.set_time(&msg.u.timeinfo);
+                    dial.set_time(msg.u.timeinfo);
                     break;
                 }
-                case LAMP1_SET_VALUE:
+                case BOARD_LAMP1_SET_VALUE:
                 {
                     dial.set_lamp_value(0, msg.u.value);
                     break;
                 }
-                case LAMP2_SET_VALUE:
+                case BOARD_LAMP2_SET_VALUE:
                 {
                     dial.set_lamp_value(1, msg.u.value);
                     break;
                 }
-                case LAMP3_SET_VALUE:
+                case BOARD_LAMP3_SET_VALUE:
                 {
                     dial.set_lamp_value(2, msg.u.value);
                     break;
                 }
-                case LAMP4_SET_VALUE:
+                case BOARD_LAMP4_SET_VALUE:
                 {
                     dial.set_lamp_value(3, msg.u.value);
                     break;
                 }
-                case BUZZER_PLAY:
+                case BOARD_BUZZER_PLAY:
                 {
                     ESP_LOGW(TAG, "Buzzer play mock");
                     break;
                 }
-                case BUZZER_STOP:
+                case BOARD_BUZZER_STOP:
                 {
                     ESP_LOGW(TAG, "Buzzer stop mock");
                     break;
                 }
-                case BTN1_SINGLE_CLICK:
-                case BTN1_DOUBLE_CLICK:
-                case BTN2_SINGLE_CLICK:
-                case BTN2_DOUBLE_CLICK:
-                case BTN3_SINGLE_CLICK:
-                case BTN3_DOUBLE_CLICK:
+                case BOARD_BTN1_SINGLE_CLICK:
+                case BOARD_BTN1_DOUBLE_CLICK:
+                case BOARD_BTN2_SINGLE_CLICK:
+                case BOARD_BTN2_DOUBLE_CLICK:
+                case BOARD_BTN3_SINGLE_CLICK:
+                case BOARD_BTN3_DOUBLE_CLICK:
                 case BOARD_EVENT_SIZE:
                     break;
             }
