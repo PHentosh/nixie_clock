@@ -40,10 +40,8 @@ struct board_msg_t {
  * @brief board callback function
  *
  * Will be called on board event
- *
- * @param [in] event event that happened
  */
-typedef void(*board_cb_t)(board_event_t event);
+typedef void(*board_cb_t)();
 
 /**
  * @brief init board tasks

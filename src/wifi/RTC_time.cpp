@@ -1,16 +1,12 @@
 #include <array>
-#include <cstring>
 #include <ctime>
 #include <cstdlib>
-//#include <chrono>
-#include <cassert>
 
 #include "RTC_time.h"
 
 //SNTP
 #include <sys/time.h>
 #include "esp_attr.h"
-#include "esp_sleep.h"
 #include "esp_sntp.h"
 
 //wifi
@@ -23,8 +19,7 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
 
-#include "lwip/err.h"
-#include "lwip/sys.h"
+#define PRINT_TIME
 
 #define MAX_CALLBACKS 5
 
@@ -53,6 +48,26 @@ class Timer final : public OSAL::Task
 {
 public:
     OSAL::Queue<timer_msg_t, 10> m_queue {nullptr};
+
+private:
+    struct current_time {
+        uint8_t hour;
+        uint8_t min;
+        uint8_t sec;
+
+        bool operator== (const current_time& rhs) const noexcept
+        {
+            return hour == rhs.hour and min == rhs.min;
+        }
+
+        bool operator== (const tm& rhs) const noexcept
+        {
+            return hour == rhs.tm_hour and min == rhs.tm_min;
+        }
+
+    };
+
+    current_time now;
 
 public:
     explicit Timer() noexcept : OSAL::Task{} {}
@@ -188,7 +203,7 @@ static void init_sntp()
     esp_sntp_init();
 }
 
-static void obtain_time()
+static void sync_system_time()
 {
     init_sntp();
     time_t now = 0;
@@ -204,24 +219,29 @@ static void obtain_time()
     localtime_r(&now, &timeinfo);
 }
 
-static void sync_system_time()  {
+static void get_time(tm& timeinfo)  {
 
     time_t now;
-    tm     timeinfo;
     time(&now);
     localtime_r(&now, &timeinfo);
     // Is time set? If not, tm_year will be (1970 - 1900).
-    if (timeinfo.tm_year < (2016 - 1900)) {
+    if (timeinfo.tm_year < (2016 - 1900))
+    {
         ESP_LOGI(TAG, "Time is not set yet. Connecting to WiFi and getting time over NTP.");
-        obtain_time();
+        sync_system_time();
         time(&now);
     }
+
+    setenv("TZ", "GMT-3", 1);
+    tzset();
+    localtime_r(&now, &timeinfo);
 }
 
 void Timer::setup() noexcept
 {
     esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES or ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES or ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
@@ -229,25 +249,55 @@ void Timer::setup() noexcept
 
     wifi_init_sta();
     sync_system_time();
+
+    now = {
+        .hour = 0,
+        .min  = 0,
+        .sec  = 0,
+    };
 }
 
 void Timer::run() noexcept
 {
     while (1)
     {
-        char strftime_buf[64];
-        time_t now;
+        timer_msg_t msg;
+        if (m_queue.receive(&msg, 0))
+        {
+            switch (msg.event)
+            {
+                case TIMER_SYNC:
+                {
+                    sync_system_time();
+                    break;
+                }
+                case TIMER_EVENT_SIZE:
+                    break;
+            }
+        }
+
         tm     timeinfo;
-        time(&now);
-        localtime_r(&now, &timeinfo);
+        get_time(timeinfo);
 
-        setenv("TZ", "GMT-3", 1);
-        tzset();
-        localtime_r(&now, &timeinfo);
+        if (now != timeinfo)
+        {
+            now.hour = timeinfo.tm_hour;
+            now.min  = timeinfo.tm_min;
+            for (auto& el: callbacks)
+            {
+                if (el.first == TIMER_SET_TIME)
+                {
+                    el.second(timeinfo);
+                }
+            }
+        }
 
+#ifdef PRINT_TIME
+        char strftime_buf[64];
         strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
         ESP_LOGI(TAG, "The current date/time in Lviv is: %s", strftime_buf);
-        vTaskDelay(pdMS_TO_TICKS(2000));
+#endif
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
 

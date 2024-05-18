@@ -6,6 +6,7 @@
 
 enum timer_event_t {
     TIMER_SYNC,
+    TIMER_SET_TIME,
 
     TIMER_EVENT_SIZE
 };
@@ -23,9 +24,9 @@ struct timer_msg_t {
  *
  * Will be called on timer event
  *
- * @param [in] event event that happened
+ * @param [in] timeinfo time info
  */
-typedef void(*timer_cb_t)(timer_event_t event);
+typedef void(*timer_cb_t)(tm& timeinfo);
 
 /**
  * @brief init timer tasks
