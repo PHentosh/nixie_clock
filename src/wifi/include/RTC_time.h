@@ -32,7 +32,7 @@ typedef void(*timer_cb_t)(timer_event_t event);
  *
  * @param [in] timer_init Rx task options
  */
-void timer_init(OSAL::Task::init_t* timer_init);
+void timer_init(const OSAL::Task::init_t& timer_init);
 
 /**
  * @brief deinit timer tasks

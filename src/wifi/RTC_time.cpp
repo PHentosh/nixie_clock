@@ -30,8 +30,8 @@
 
 static const char *TAG = "TIMER";
 
-#define EXAMPLE_ESP_WIFI_SSID      "ssid"
-#define EXAMPLE_ESP_WIFI_PASS      "password"
+#define EXAMPLE_ESP_WIFI_SSID      "iHomeWave"
+#define EXAMPLE_ESP_WIFI_PASS      "b@r@b01@"
 
 static EventGroupHandle_t s_wifi_event_group;
 
@@ -246,7 +246,7 @@ void Timer::run() noexcept
         localtime_r(&now, &timeinfo);
 
         strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-        ESP_LOGI(TAG, "The current date/time in Delhi is: %s", strftime_buf);
+        ESP_LOGI(TAG, "The current date/time in Lviv is: %s", strftime_buf);
         vTaskDelay(pdMS_TO_TICKS(2000));
     }
 }
@@ -257,13 +257,13 @@ void Timer::teardown() noexcept
 }
 
 
-void timer_init(OSAL::Task::init_t* timer_init)
+void timer_init(const OSAL::Task::init_t& timer_init)
 {
     static std::aligned_storage_t<sizeof(Timer), alignof(Timer)> _task_rx_storage;
 
     assert(not _task_timer);
     _task_timer = new(&_task_rx_storage) Timer{};
-    bool ret = _task_timer->start(*timer_init);
+    bool ret = _task_timer->start(timer_init);
     assert(ret);
 }
 
