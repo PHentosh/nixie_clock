@@ -93,19 +93,40 @@ void BoardRx::run() noexcept
             switch (msg.event) {
 
                 case DIAL_SET_TIME:
+                {
                     dial.set_time(&msg.u.timeinfo);
+                    break;
+                }
                 case LAMP1_SET_VALUE:
+                {
                     dial.set_lamp_value(0, msg.u.value);
+                    break;
+                }
                 case LAMP2_SET_VALUE:
+                {
                     dial.set_lamp_value(1, msg.u.value);
+                    break;
+                }
                 case LAMP3_SET_VALUE:
+                {
                     dial.set_lamp_value(2, msg.u.value);
+                    break;
+                }
                 case LAMP4_SET_VALUE:
+                {
                     dial.set_lamp_value(3, msg.u.value);
+                    break;
+                }
                 case BUZZER_PLAY:
+                {
                     ESP_LOGW(TAG, "Buzzer play mock");
+                    break;
+                }
                 case BUZZER_STOP:
+                {
                     ESP_LOGW(TAG, "Buzzer stop mock");
+                    break;
+                }
                 case BTN1_SINGLE_CLICK:
                 case BTN1_DOUBLE_CLICK:
                 case BTN2_SINGLE_CLICK:
@@ -116,6 +137,7 @@ void BoardRx::run() noexcept
                     break;
             }
         }
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
 
