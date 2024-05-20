@@ -1,3 +1,5 @@
+#include "esp_wifi.h"
+
 #include "osal.h"
 #include "board.h"
 #include "RTC_time.h"
@@ -35,6 +37,8 @@ void timer_cb(tm& timeinfo)
 }
 
 void app_start() {
+    ESP_ERROR_CHECK(esp_netif_init());
+
     board_init(tasks[TSK_BOARD_RX], tasks[TSK_BOARD_RX]);
     timer_init(tasks[TSK_TIMER]);
 

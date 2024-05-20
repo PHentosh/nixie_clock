@@ -31,7 +31,7 @@ private:
     uint8_t         address;
 
 public:
-    Lamp(mcp23017_t* mcp_cfg, uint8_t addr, mcp23017_gpio_t group) noexcept :
+    explicit Lamp(mcp23017_t* mcp_cfg, uint8_t addr, mcp23017_gpio_t group) noexcept :
         mcp_cfg{mcp_cfg}, address{addr}, group{group} {};
     ~Lamp() noexcept = default;
 

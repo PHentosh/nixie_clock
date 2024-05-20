@@ -7,7 +7,6 @@
 //SNTP
 #include <sys/time.h>
 #include "esp_attr.h"
-#include "esp_sntp.h"
 
 //wifi
 #include "freertos/FreeRTOS.h"
@@ -127,7 +126,6 @@ static void wifi_init_sta()
 {
     s_wifi_event_group = xEventGroupCreate();
 
-    ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     esp_netif_create_default_wifi_sta();
 
