@@ -1,10 +1,13 @@
 #include <array>
+#include <vector>
 
 #include "esp_log.h"
+#include "nvs_flash.h"
 
 #include "board.h"
 #include "mcp23017.h"
 #include "dial.h"
+#include "buttons.h"
 
 #define I2C_SDA_IO 14
 #define I2C_SCL_IO 15
@@ -38,6 +41,9 @@ private:
 
 class BoardTx final : public OSAL::Task
 {
+private:
+    std::vector<Button> buttons;
+
 public:
     explicit BoardTx() noexcept : OSAL::Task{} {}
 
@@ -69,6 +75,16 @@ static bool init_mcp23017(mcp23017_t* mcp_cfg)
     ret = ret || mcp23017_write_register(mcp_cfg, MCP23017_GPPU, GPIOB, 0x0);
 
     return ret;
+}
+
+static board_event_t check_button_status(Button& btn)
+{
+    if(not btn.is_pressed())
+        return BOARD_EVENT_SIZE;
+
+    while(btn.is_pressed()) {}
+
+
 }
 
 void BoardRx::setup() noexcept
@@ -149,10 +165,19 @@ void BoardRx::teardown() noexcept
 
 void BoardTx::setup() noexcept
 {
+    nvs_flash_init();
+
+    buttons.emplace_back(GPIO_NUM_12);
+    buttons.emplace_back(GPIO_NUM_13);
+    buttons.emplace_back(GPIO_NUM_14);
 }
 
 void BoardTx::run() noexcept
 {
+    while (1) {
+        if()
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
 }
 
 void BoardTx::teardown() noexcept
@@ -160,7 +185,8 @@ void BoardTx::teardown() noexcept
 
 }
 
-void board_init(const OSAL::Task::init_t& rx_init, const OSAL::Task::init_t& tx_init){
+void board_init(const OSAL::Task::init_t& rx_init, const OSAL::Task::init_t& tx_init)
+{
     static std::aligned_storage_t<sizeof(BoardRx), alignof(BoardRx)> _task_rx_storage;
 
     assert(not _task_rx);
@@ -174,7 +200,8 @@ void board_init(const OSAL::Task::init_t& rx_init, const OSAL::Task::init_t& tx_
 
 }
 
-bool board_deinit(){
+bool board_deinit()
+{
     if(not _task_rx )
         return true;
 
@@ -182,7 +209,8 @@ bool board_deinit(){
     return true;
 }
 
-bool board_register_cb(board_event_t on_event, board_cb_t func){
+bool board_register_cb(board_event_t on_event, board_cb_t func)
+{
     if (callback_num >= MAX_CALLBACKS)
         return false;
 
@@ -191,8 +219,8 @@ bool board_register_cb(board_event_t on_event, board_cb_t func){
     return true;
 }
 
-void board_cb(board_msg_t* msg){
-
+void board_cb(board_msg_t* msg)
+{
     if (not _task_rx){
         ESP_LOGE(TAG, "Trying to send message before task inited");
         assert(false);

@@ -8,4 +8,4 @@ target_sources(bal PRIVATE
         dial.cpp
 )
 target_include_directories(bal PUBLIC include)
-target_link_libraries(bal PUBLIC idf::esp_wifi mcp23017 _core)
+target_link_libraries(bal PUBLIC idf::esp_wifi idf::nvs_flash mcp23017 _core)
