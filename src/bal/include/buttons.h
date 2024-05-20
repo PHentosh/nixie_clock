@@ -20,7 +20,6 @@ public:
     Button &operator=(Button &&) = default;
 
     bool is_pressed() const;
-    static void intr_cb(void* arg);
 };
 
 #endif //EXPERIMENTS_BUTTONS_H

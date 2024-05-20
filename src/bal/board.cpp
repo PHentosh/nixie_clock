@@ -77,16 +77,6 @@ static bool init_mcp23017(mcp23017_t* mcp_cfg)
     return ret;
 }
 
-static board_event_t check_button_status(Button& btn)
-{
-    if(not btn.is_pressed())
-        return BOARD_EVENT_SIZE;
-
-    while(btn.is_pressed()) {}
-
-
-}
-
 void BoardRx::setup() noexcept
 {
     if (not init_mcp23017(&mcp_cfg))
@@ -175,7 +165,7 @@ void BoardTx::setup() noexcept
 void BoardTx::run() noexcept
 {
     while (1) {
-        if()
+//        if()
         vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
