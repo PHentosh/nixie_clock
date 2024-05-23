@@ -22,11 +22,15 @@ $> make generate
 ```
 
 
-### Make app
+### Make app or all
 This command will build the project
 
 ```
 $> make app
+```
+
+```
+$> make all
 ```
 
 ### Make flash
