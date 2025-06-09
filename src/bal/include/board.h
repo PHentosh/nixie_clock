@@ -5,6 +5,8 @@
 #include "esp_sntp.h"
 
 enum board_event_t {
+    _,
+
     BOARD_BTN1_SINGLE_CLICK,
     BOARD_BTN1_DOUBLE_CLICK,
 
@@ -23,6 +25,7 @@ enum board_event_t {
 
     BOARD_BUZZER_PLAY,
     BOARD_BUZZER_STOP,
+    BOARD_BUZZER_SET_FREQUENCY,
 
     BOARD_EVENT_SIZE
 };
@@ -31,8 +34,9 @@ struct board_msg_t {
     board_event_t event;
 
     union {
-        uint8_t value;
-        tm      timeinfo;
+        uint8_t  u8;
+        uint32_t u32;
+        tm       timeinfo;
     } u;
 };
 
