@@ -156,6 +156,17 @@ namespace OSAL {
         }
 
         /**
+         * @copydoc osal_queue_send_from_isr
+         */
+        [[nodiscard]] static bool send_from_isr(osal_queue_t handle, const T* item_p) noexcept
+        {
+            if(not handle or not item_p)
+                return false;
+
+            return pdTRUE == xQueueSendToBackFromISR(static_cast<QueueHandle_t>(handle), item_p, NULL);
+        }
+
+        /**
          * @copydoc osal_queue_recv
          */
         [[nodiscard]] static bool receive(osal_queue_t handle, T* item_p, uint32_t timeout_ms) noexcept
@@ -191,6 +202,19 @@ namespace OSAL {
         [[nodiscard]] bool send(const T* item_p, uint32_t timeout_ms) const noexcept
         {
             return send(m_handle, item_p, timeout_ms);
+        }
+
+        /**
+         * @brief send item to queue form ISR
+         *
+         * @param [in] item_p pointer to item
+         *
+         * @retval true  success
+         * @retval false timeout expired
+         */
+        [[nodiscard]] bool send_form_isr(const T* item_p) const noexcept
+        {
+            return send_from_isr(m_handle, item_p);
         }
 
         /**
